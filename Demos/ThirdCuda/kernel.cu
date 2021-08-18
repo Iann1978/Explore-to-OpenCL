@@ -8,31 +8,29 @@
 
 #include <iostream>
 
-__global__ void simulateKernel(float* dst, float* src)
+__global__ void simulateKernel(float* dst, const float* src)
 {
     int row = threadIdx.x;
     int col = threadIdx.y;
     
-    float value0 = src[row * 10 + col];
-    float dh = 0;
+    float centerHeight = src[row * 10 + col];
+    float centerDeitaH = 0;
     for (int drow = -1; drow <= 1; drow++)
     {
         for (int dcol = -1; dcol <= 1; dcol++)
         {
-            int index = (row + drow) * 10 + col + dcol;
-            if (index < 0)
+            int neighborIdx = (row + drow) * 10 + col + dcol;
+            if (neighborIdx < 0)
                 continue;
-            if (index >= 10 * 10)
+            if (neighborIdx >= 10 * 10)
                 continue;
 
-            float value1 = src[index];
-
-            if (value1 > value0) dh +=1;
-            if (value1 < value0) dh -=1;
-
+            float neighborHeight = src[neighborIdx];
+            float deitaH = neighborHeight - centerHeight;
+            centerDeitaH += deitaH / 8.0;
         }
     }
-    dst[row*10+col] = src[row*10+col] + dh;
+    dst[row*10+col] = src[row*10+col] + centerDeitaH;
 }
 
 cudaError_t simulate(float src[10][10], float dst[10][10])
@@ -69,25 +67,73 @@ cudaError_t simulate(float src[10][10], float dst[10][10])
 
 
     dim3 block(10, 10);
-    simulateKernel<<<1, block>>> ((float*)dev_dst, (float*)dev_src);
+    
+    /* First time */    {
+        simulateKernel << <1, block >> > ((float*)dev_dst, (float*)dev_src);
 
-    // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "simulateKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
+        // Check for any errors launching the kernel
+        cudaStatus = cudaGetLastError();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "simulateKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+            goto Error;
+        }
+
+        // cudaDeviceSynchronize waits for the kernel to finish, and returns
+        // any errors encountered during the launch.
+        cudaStatus = cudaDeviceSynchronize();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching simulateKernel!\n", cudaStatus);
+            goto Error;
+        }
+    }
+   
+     
+    /* Second time */ {
+        simulateKernel << <1, block >> > ((float*)dev_src, (float*)dev_dst);
+        // Check for any errors launching the kernel
+        cudaStatus = cudaGetLastError();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "simulateKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+            goto Error;
+        }
+
+        // cudaDeviceSynchronize waits for the kernel to finish, and returns
+        // any errors encountered during the launch.
+        cudaStatus = cudaDeviceSynchronize();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching simulateKernel!\n", cudaStatus);
+            goto Error;
+        }
     }
 
-    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-    // any errors encountered during the launch.
-    cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching simulateKernel!\n", cudaStatus);
-        goto Error;
+    /* Third time */ {
+        simulateKernel << <1, block >> > ((float*)dev_dst, (float*)dev_src);
+
+        // Check for any errors launching the kernel
+        cudaStatus = cudaGetLastError();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "simulateKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+            goto Error;
+        }
+
+        // cudaDeviceSynchronize waits for the kernel to finish, and returns
+        // any errors encountered during the launch.
+        cudaStatus = cudaDeviceSynchronize();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching simulateKernel!\n", cudaStatus);
+            goto Error;
+        }
     }
+
 
     // Copy output vector from GPU buffer to host memory.
     cudaStatus = cudaMemcpy(dst , dev_dst, 10 * 10 * sizeof(float), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+        goto Error;
+    }
+
+    cudaStatus = cudaMemcpy(src, dev_src, 10 * 10 * sizeof(float), cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
@@ -100,9 +146,10 @@ Error:
     return cudaStatus;
 }
 
-
+#include <algorithm>
 void flowtest()
 {
+    // Initialize src
     float src[10][10];
     for (int row = 0; row < 10; row++)
     {
@@ -111,7 +158,9 @@ void flowtest()
             src[row][col] = 5;
         }
     }
+    src[5][5] = 10;
 
+    // Initialzie dst
     float dst[10][10];
     for (int row = 0; row < 10; row++)
     {
@@ -120,7 +169,17 @@ void flowtest()
             dst[row][col] = 0;
         }
     }
-    src[5][5] = 10;
+
+    // Calculate the summary of src
+    float sumSrc = 0;
+    for (int row = 0; row < 10; row++)
+    {
+        for (int col = 0; col < 10; col++)
+        {
+            sumSrc += src[row][col];
+        }
+    }
+
 
     std::cout << "before simulate " << std::endl;
     std::cout << "src: " << std::endl;
@@ -171,6 +230,26 @@ void flowtest()
         std::cout << std::endl;
     }
 
+    // Calculate summary of dst
+    float sumDst = 0;
+    for (int row = 0; row < 10; row++)
+    {
+        for (int col = 0; col < 10; col++)
+        {
+            sumDst += dst[row][col];
+        }
+    }
+
+    std::cout << "sumSrc:" << sumSrc << std::endl;
+    std::cout << "sumDst:" << sumDst << std::endl;
+    if (sumSrc == sumDst)
+    {
+        std::cout << "Pass sum check!!" << std::endl;
+    }
+    else
+    {
+        std::cout << "Not pass sum check!!" << std::endl;
+    }
 }
 int main()
 {
