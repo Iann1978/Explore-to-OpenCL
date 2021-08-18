@@ -1,4 +1,4 @@
-
+//https://blog.csdn.net/sunmc1204953974/article/details/51000970
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -9,31 +9,18 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 __global__ void addKernel(int *c, const int *a, const int *b)
 {
     int i = threadIdx.x;
-	if (i%2)
-	{
-		c[i] = a[i] + b[i];
-	}
-	else
-	{
-		c[i] = a[i] - b[i];
-	}
-    
+	c[i] = a[i] + b[i];
 }
 
 int main()
 {
-    const int arraySize = 1024;
+    const int arraySize = 5;
 	int* a;
 	int* b;
     int c[arraySize] = { 0 };
 
-	a = new int[1024];
-	b = new int[1024];
-	for (int i = 0; i < arraySize; i++)
-	{
-		a[i] = i;
-		b[i] = i;
-	}
+    a = new int[5]{ 1,2,3,4,5 };
+    b = new int[5]{ 10,20,30,40,50 };
 
     // Add vectors in parallel.
     cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
