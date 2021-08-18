@@ -8,13 +8,13 @@
 
 #include <iostream>
 
-__global__ void simulateKernel(int* dst, int* src)
+__global__ void simulateKernel(float* dst, float* src)
 {
     int row = threadIdx.x;
     int col = threadIdx.y;
     
-    int value0 = src[row * 10 + col];
-    int dh = 0;
+    float value0 = src[row * 10 + col];
+    float dh = 0;
     for (int drow = -1; drow <= 1; drow++)
     {
         for (int dcol = -1; dcol <= 1; dcol++)
@@ -25,17 +25,17 @@ __global__ void simulateKernel(int* dst, int* src)
             if (index >= 10 * 10)
                 continue;
 
-            int value1 = src[index];
+            float value1 = src[index];
 
-            if (value1 > value0) dh++;
-            if (value1 < value0) dh--;
+            if (value1 > value0) dh +=1;
+            if (value1 < value0) dh -=1;
 
         }
     }
     dst[row*10+col] = src[row*10+col] + dh;
 }
 
-cudaError_t simulate(int src[10][10], int dst[10][10])
+cudaError_t simulate(float src[10][10], float dst[10][10])
 {
     void* dev_src = 0;
     void* dev_dst = 0;
@@ -46,38 +46,35 @@ cudaError_t simulate(int src[10][10], int dst[10][10])
         fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
         goto Error;
     }
+
     // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc(&dev_src, 10 * 10 * sizeof(int));
+    cudaStatus = cudaMalloc(&dev_src, 10 * 10 * sizeof(float));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
-    cudaStatus = cudaMalloc(&dev_dst, 10 * 10 * sizeof(int));
+    cudaStatus = cudaMalloc(&dev_dst, 10 * 10 * sizeof(float));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
     // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_src, src, 10 * 10 * sizeof(int), cudaMemcpyHostToDevice);
+    cudaStatus = cudaMemcpy(dev_src, src, 10 * 10 * sizeof(float), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
 
-    //cudaStatus = cudaMemcpy(dev_dst, dst, 10 * 10 * sizeof(int), cudaMemcpyHostToDevice);
-    //if (cudaStatus != cudaSuccess) {
-    //    fprintf(stderr, "cudaMemcpy failed!");
-    //    goto Error;
-    //}
+
     dim3 block(10, 10);
-    simulateKernel<<<1, block>>> ((int*)dev_dst, (int*)dev_src);
+    simulateKernel<<<1, block>>> ((float*)dev_dst, (float*)dev_src);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        fprintf(stderr, "simulateKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
@@ -85,25 +82,17 @@ cudaError_t simulate(int src[10][10], int dst[10][10])
     // any errors encountered during the launch.
     cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching simulateKernel!\n", cudaStatus);
         goto Error;
     }
 
     // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(dst , dev_dst, 10 * 10 * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaStatus = cudaMemcpy(dst , dev_dst, 10 * 10 * sizeof(float), cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
 
-
-    //for (int row = 0; row < 10; row++)
-    //{
-    //    for (int col = 0; col < 10; col++)
-    //    {
-    //        dst[row][col] = src[row][col];
-    //    }
-    //}
     return cudaStatus;
 Error:
     cudaFree(dev_src);
@@ -114,7 +103,7 @@ Error:
 
 void flowtest()
 {
-    int src[10][10];
+    float src[10][10];
     for (int row = 0; row < 10; row++)
     {
         for (int col = 0; col < 10; col++)
@@ -123,7 +112,7 @@ void flowtest()
         }
     }
 
-    int dst[10][10];
+    float dst[10][10];
     for (int row = 0; row < 10; row++)
     {
         for (int col = 0; col < 10; col++)
