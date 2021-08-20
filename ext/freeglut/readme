@@ -1,0 +1,1 @@
+.vcpkg.exe install freeglut:x64-windows
