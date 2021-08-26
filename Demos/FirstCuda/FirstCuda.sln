@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdCuda", "..\ThirdCuda\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlCuda1", "..\GlCuda1\GlCuda1.vcxproj", "{26842F62-958A-48B3-BB61-4D9538AF6524}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DSR", "..\DSR\DSR.vcxproj", "{480F33B5-1B07-4BC7-8781-978F79763465}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -35,6 +37,12 @@ Global
 		{26842F62-958A-48B3-BB61-4D9538AF6524}.Release|x64.ActiveCfg = Release|x64
 		{26842F62-958A-48B3-BB61-4D9538AF6524}.Release|x64.Build.0 = Release|x64
 		{26842F62-958A-48B3-BB61-4D9538AF6524}.Release|x86.ActiveCfg = Release|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Debug|x64.ActiveCfg = Debug|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Debug|x64.Build.0 = Debug|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Debug|x86.ActiveCfg = Debug|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Release|x64.ActiveCfg = Release|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Release|x64.Build.0 = Release|x64
+		{480F33B5-1B07-4BC7-8781-978F79763465}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
