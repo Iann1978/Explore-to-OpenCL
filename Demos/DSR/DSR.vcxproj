@@ -82,6 +82,7 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BufferExchanger.cpp" />
     <ClCompile Include="DSRSimulator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -91,6 +92,7 @@
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BufferExchanger.h" />
     <ClInclude Include="DSRSimulator.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />

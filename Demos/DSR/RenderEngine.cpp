@@ -37,6 +37,11 @@ void RenderEngine::display1()
     //glColor3f(1.0, 0.0, 0.0);
     //glDrawArrays(GL_POINTS, 0, mesh_width * mesh_height);
     //glDisableClientState(GL_VERTEX_ARRAY);
+    GLenum err = glGetError();
+    exchanger->ReadFromTexture(this->texture);
+
+    exchanger->WriteToTexture(this->texture);
+
 
     material->Use();
     Mesh::RenderMesh(mesh);
@@ -91,7 +96,7 @@ bool RenderEngine::initGL(int* argc, char** argv)
     material = new Material(shader);
     material->configStatus = Material::ConfigStatus_Geomtery;
     material->SetTexture("_HeightMap", texture);
-
+    exchanger = new BufferExchanger();
 
     
 
