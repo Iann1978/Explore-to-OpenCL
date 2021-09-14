@@ -12,8 +12,10 @@ void display()
 {
     engine->display1();
 }
+#include "DSRSimulator.h"
 void RenderEngine::display1()
 {
+
     //  main1();
       //sdkStartTimer(&timer);
 
@@ -39,6 +41,8 @@ void RenderEngine::display1()
     //glDisableClientState(GL_VERTEX_ARRAY);
     GLenum err = glGetError();
     exchanger->ReadFromTexture(this->texture);
+
+    simulator->runOnce();
 
     exchanger->WriteToTexture(this->texture);
 
@@ -90,7 +94,7 @@ bool RenderEngine::initGL(int* argc, char** argv)
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat)window_height, 0.1, 10.0);
 
     mesh = Mesh::CreateQuadFlipY(glm::vec4(0, 0, 0.5, 0.5));
-    texture = new Texture(window_width, window_height, Texture::Usage::HeightMap);
+    texture = new Texture(1, 1, Texture::Usage::HeightMap);
     shader = new Shader("abc");
     shader->Load2("PureColor3D_vert.shader", "PureColor3D_frag.shader");
     material = new Material(shader);

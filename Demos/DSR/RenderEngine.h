@@ -4,7 +4,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "BufferExchanger.h"
-
+class DSRSimulator;
 class RenderEngine
 {
 public:
@@ -12,7 +12,8 @@ public:
 	Material* material = nullptr;
 	Mesh* mesh = nullptr;
 	Texture* texture = nullptr;
-	BufferExchanger* exchanger;
+	BufferExchanger* exchanger = nullptr;
+	DSRSimulator* simulator = nullptr;
 public:
 	RenderEngine(int* argc, char** argv);
 	void run();

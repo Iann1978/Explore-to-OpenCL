@@ -3,6 +3,7 @@
 class DSRSimulator
 {
 public:
-	DSRSimulator(Texture* tex);
+	DSRSimulator(int pbo);
+	void runOnce();
 };
 

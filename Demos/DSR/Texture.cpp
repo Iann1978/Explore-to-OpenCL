@@ -49,6 +49,7 @@ int Texture::CreateHeightMap()
 
 	float* image_data = new float[width * height];
 	memset(image_data, 0, width * height*sizeof(float));
+	image_data[0] = 3;
 	//float* start = image_data;
 	//float* end = image_data + width * height;
 	//while (start < end) *start++ = 1;

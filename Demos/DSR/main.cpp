@@ -7,7 +7,8 @@ int main(int argc, char** argv)
 {
 	//return main1();
 	RenderEngine engine(&argc, argv);
-	DSRSimulator(engine.texture);
+	DSRSimulator simulator(engine.exchanger->pbo);
+	engine.simulator = &simulator;
 	engine.run();
 }
 
