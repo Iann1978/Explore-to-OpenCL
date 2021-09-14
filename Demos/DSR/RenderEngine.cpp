@@ -15,7 +15,7 @@ void display()
 #include "DSRSimulator.h"
 void RenderEngine::display1()
 {
-
+    std::cout << __FUNCTION__ << std::endl;
     //  main1();
       //sdkStartTimer(&timer);
 
@@ -67,6 +67,7 @@ bool RenderEngine::initGL(int* argc, char** argv)
     glutInitWindowSize(window_width, window_height);
     glutCreateWindow("Cuda GL Interop (VBO)");
     glutDisplayFunc(display);
+    glutIdleFunc(display);
     ////glutKeyboardFunc(keyboard);
     ////glutMotionFunc(motion);
     ////glutTimerFunc(REFRESH_DELAY, timerEvent, 0);
