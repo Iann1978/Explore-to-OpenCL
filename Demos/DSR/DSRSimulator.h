@@ -1,9 +1,11 @@
 #pragma once
 #include "Texture.h"
+class BufferExchanger;
 class DSRSimulator
 {
 public:
-	DSRSimulator(int pbo);
+	BufferExchanger* changer = nullptr;
+	DSRSimulator(BufferExchanger* changer);
 	void runOnce();
 };
 

@@ -1,13 +1,13 @@
 #include "BufferExchanger.h"
 
-BufferExchanger::BufferExchanger()
+BufferExchanger::BufferExchanger(Texture* tex)
+	:tex(tex)
 {
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-	int BUFFER_SIZE = 1 * 1 * 4;
+	int BUFFER_SIZE = tex->width * tex->height * 4;
 	glBufferData(GL_PIXEL_PACK_BUFFER, BUFFER_SIZE, 0, GL_STREAM_COPY);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
 }
 
 

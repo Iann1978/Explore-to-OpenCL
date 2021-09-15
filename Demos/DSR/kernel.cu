@@ -7,16 +7,17 @@
 
 __global__ void moveLeft(float* vert)
 {
-    vert[0] = 0.2;
+    int idx = threadIdx.y * blockDim.x + threadIdx.x;
+    vert[idx] = vert[idx] + 0.0051;
 }
 
-bool launch_kernel(float* pos)
+bool launch_kernel(float* pos, int width, int height)
 {
 
     cudaError_t cudaStatus = cudaSuccess;
     // execute the kernel
-    dim3 block(1, 1, 1);
     dim3 grid(1, 1, 1);
+    dim3 block(width, height, 1); 
     moveLeft << < grid, block >> > (pos);
 
 

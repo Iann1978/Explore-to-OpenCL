@@ -95,13 +95,13 @@ bool RenderEngine::initGL(int* argc, char** argv)
     //gluPerspective(60.0, (GLfloat)window_width / (GLfloat)window_height, 0.1, 10.0);
 
     mesh = Mesh::CreateQuadFlipY(glm::vec4(0, 0, 0.5, 0.5));
-    texture = new Texture(1, 1, Texture::Usage::HeightMap);
+    texture = new Texture(4, 4, Texture::Usage::HeightMap);
     shader = new Shader("abc");
     shader->Load2("PureColor3D_vert.shader", "PureColor3D_frag.shader");
     material = new Material(shader);
     material->configStatus = Material::ConfigStatus_Geomtery;
     material->SetTexture("_HeightMap", texture);
-    exchanger = new BufferExchanger();
+    exchanger = new BufferExchanger(texture);
 
     
 

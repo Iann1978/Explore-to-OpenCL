@@ -4,14 +4,17 @@
 #include "device_launch_parameters.h"
 #include "cuda_gl_interop.h"
 #include <iostream>
+#include "BufferExchanger.h"
 
 //cudaGraphicsResource* vbo_res = nullptr;
 float* dptr = 0;
 size_t num_bytes = 0;
 struct cudaGraphicsResource* cuda_pbo_resource;
 
-DSRSimulator::DSRSimulator(int pbo)
+DSRSimulator::DSRSimulator(BufferExchanger* changer)
+    :changer(changer)
 {
+    
 	std::cout << "DSRSimulator::DSRSimulator()" << std::endl;
     cudaError_t cudaStatus;
     cudaStatus = cudaSetDevice(0);
@@ -20,7 +23,7 @@ DSRSimulator::DSRSimulator(int pbo)
         goto Error;
     }
 
-    cudaStatus = cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, pbo, cudaGraphicsMapFlagsWriteDiscard);
+    cudaStatus = cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, changer->pbo, cudaGraphicsMapFlagsWriteDiscard);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaGraphicsGLRegisterBuffer failed!");
         goto Error;
@@ -29,7 +32,7 @@ DSRSimulator::DSRSimulator(int pbo)
     Error:
     std::cout << "Error in DSRSimulator::DSRSimulator()" << std::endl;
 }
-bool launch_kernel(float* pos);
+bool launch_kernel(float* pos, int width, int height);
 void DSRSimulator::runOnce()
 {
     std::cout << "DSRSimulator::runOnce()" << std::endl;
@@ -47,7 +50,7 @@ void DSRSimulator::runOnce()
         goto Error;
     }
 
-    bool err = launch_kernel(dptr);
+    bool err = launch_kernel(dptr, changer->tex->width, changer->tex->height);
 
 
     cudaStatus = cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
