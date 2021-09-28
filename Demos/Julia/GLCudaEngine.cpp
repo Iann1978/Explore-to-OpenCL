@@ -61,7 +61,7 @@ void GLCudaEngine::InitGL(int* argc, char** argv)
     shader = new Shader("abc");
     shader->Load2("PureColor3D_vert.shader", "PureColor3D_frag.shader");
 
-    texture = new Texture(4, 4, Texture::Usage::HeightMap);
+    texture = new Texture(32, 32, Texture::Usage::HeightMap);
 
     material = new Material(shader);
     material->configStatus = Material::ConfigStatus_Geomtery;
