@@ -30,7 +30,7 @@ int Texture::CreateBaseTexture()
 	unsigned char* image_data = new unsigned char[width * height * 4];
 	memset(image_data, 255, width * height * 4);
 	// Upload pixels into texture
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	//glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
 	delete image_data;
 	return 0;
