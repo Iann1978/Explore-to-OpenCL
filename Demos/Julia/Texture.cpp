@@ -54,7 +54,7 @@ int Texture::CreateHeightMap()
 	//float* end = image_data + width * height;
 	//while (start < end) *start++ = 1;
 	// Upload pixels into texture
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 4);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, image_data);
 	delete image_data;
 	return 0;
