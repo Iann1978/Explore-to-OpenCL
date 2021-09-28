@@ -4,22 +4,56 @@
 
 #include <stdio.h>
 
-
-
-__global__ void Add0001(float* vert, int width, int height)
-{
-    if (blockIdx.x >= width)
-        return;
-    if (blockIdx.y >= height)
-        return;
-
-    int idx = blockIdx.y * gridDim.x + blockIdx.x;
-    //if (idx < 100)
+struct cuComplex {
+    float r;
+    float i;
+    
+    __device__ cuComplex(float a, float b) : r(a), i(b) {}
+    __device__ float magnitude2(void) 
     {
-        vert[idx] = vert[idx] + 0.001 * blockIdx.x;
+        return r * r + i * i;
     }
 
+    __device__ cuComplex operator * (const cuComplex& a) 
+    {
+        return cuComplex(r * a.r - i * a.i, i * a.r + r * a.i);
+    }
+
+    __device__ cuComplex operator + (const cuComplex& a)
+    {
+        return cuComplex(r + a.r, i + a.i);
+    }
+};
+
+#define DIM 512
+__device__ int julia(int x, int y)
+{
+    const float scale = 1.5;
+    float jx = scale * (float)(DIM / 2 - x) / (DIM / 2);
+    float jy = scale * (float)(DIM / 2 - y) / (DIM / 2);
+
+    cuComplex c(-0.8, 0.156);
+    cuComplex a(jx, jy);
+
+    int i = 0;
+    for (i = 0; i < 200; i++)
+    {
+        a = a * a + c;
+        if (a.magnitude2() > 1000)
+            return 0;
+    }
+    return 1;
 }
+
+__global__ void kernel(float* ptr)
+{
+    int x = blockIdx.x;
+    int y = blockIdx.y;
+    int offset = x + y * gridDim.x;
+    int juliaValue = julia(x, y);
+    ptr[offset] = juliaValue;
+}
+
 
 bool launch_kernel(float* pos, int width, int height)
 {
@@ -34,7 +68,7 @@ bool launch_kernel(float* pos, int width, int height)
     // execute the kernel
     dim3 grid(width, height, 1);
     dim3 block(1, 1, 1);
-    Add0001 << < grid, block >> > (pos, width, height);
+    kernel << < grid, block >> > (pos);
 
 
     cudaStatus = cudaGetLastError();
