@@ -3,7 +3,7 @@
 
 
 #include "Shader.h"
-//#include "Texture.h"
+#include "Texture.h"
 //#include "CubeMap.h"
 
 
@@ -141,25 +141,25 @@ void Material::Use()
 
 	//assert(((bool)(texValues.size()<=2)));
 	int texIdx = 0;
-	//for (auto i : texValues)
-	//{
-	//	glActiveTexture(GL_TEXTURE0 + texIdx);
-	//	glBindTexture(GL_TEXTURE_2D, i.second);
-	//	GLuint id = glGetUniformLocation(shader->program, i.first.c_str());
-	//	glUniform1i(id, texIdx);
-	//	texIdx++;
-	//}
+	for (auto i : texValues)
+	{
+		glActiveTexture(GL_TEXTURE0 + texIdx);
+		glBindTexture(GL_TEXTURE_2D, i.second);
+		GLuint id = glGetUniformLocation(shader->program, i.first.c_str());
+		glUniform1i(id, texIdx);
+		texIdx++;
+	}
 
 	//for (auto i : texValues1)
-	//for (std::map<std::string, Texture*>::iterator i = texValues1.begin();
-	//	i != texValues1.end(); i++)
-	//{
-	//	glActiveTexture(GL_TEXTURE0 + texIdx);
-	//	glBindTexture(GL_TEXTURE_2D, i->second->texture);
-	//	GLuint id = glGetUniformLocation(shader->program, i->first.c_str());
-	//	glUniform1i(id, texIdx);
-	//	texIdx++;
-	//}
+	for (std::map<std::string, Texture*>::iterator i = texValues1.begin();
+		i != texValues1.end(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + texIdx);
+		glBindTexture(GL_TEXTURE_2D, i->second->texture);
+		GLuint id = glGetUniformLocation(shader->program, i->first.c_str());
+		glUniform1i(id, texIdx);
+		texIdx++;
+	}
 
 	//for (auto i : texValues2)
 	//{
