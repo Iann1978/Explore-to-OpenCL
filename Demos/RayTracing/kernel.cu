@@ -27,7 +27,8 @@ struct Sphere {
     }
 };
 
-__global__ void kernel(float* ptr, int ticks, Sphere* s)
+__constant__ Sphere s[SPHERES];
+__global__ void kernel(float* ptr, int ticks/*, Sphere* s*/)
 {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -66,7 +67,7 @@ bool launch_kernel(float* pos, int width, int height)
     static int ticks = 0;
 
 
-    Sphere* s = nullptr;
+    //Sphere* s = nullptr;
     cudaError_t cudaStatus = cudaSuccess;
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
@@ -91,15 +92,21 @@ bool launch_kernel(float* pos, int width, int height)
         }
     }
   
-    cudaStatus = cudaMalloc((void**)&s, sizeof(Sphere) * SPHERES);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc((void**)&dev_s, sizeof(Sphere) * SPHERES) failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
+    //cudaStatus = cudaMalloc((void**)&s, sizeof(Sphere) * SPHERES);
+    //if (cudaStatus != cudaSuccess) {
+    //    fprintf(stderr, "cudaMalloc((void**)&dev_s, sizeof(Sphere) * SPHERES) failed: %s\n", cudaGetErrorString(cudaStatus));
+    //    goto Error;
+    //}
 
-    cudaStatus = cudaMemcpy(s, temp_s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice);
+    //cudaStatus = cudaMemcpy(s, temp_s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice);
+    //if (cudaStatus != cudaSuccess) {
+    //    fprintf(stderr, "cudaMemcpy(dev_s, s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice) failed: %s\n", cudaGetErrorString(cudaStatus));
+    //    goto Error;
+    //}
+
+    cudaStatus = cudaMemcpyToSymbol(s, temp_s, sizeof(Sphere) * SPHERES);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy(dev_s, s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice) failed: %s\n", cudaGetErrorString(cudaStatus));
+        fprintf(stderr, "cudaMemcpyToSymbol(s, temp_s, sizeof(Sphere) * SPHERES) failed: %s\n", cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
@@ -109,18 +116,18 @@ bool launch_kernel(float* pos, int width, int height)
     // execute the kernel
     dim3 grid(DIM/16, DIM/16, 1);
     dim3 block(16, 16, 1);
-    kernel << < grid, block >> > (pos, ticks++,s);
+    kernel << < grid, block >> > (pos, ticks++/*,s*/);
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
-    cudaStatus = cudaFree(s);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaFree failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
+    //cudaStatus = cudaFree(s);
+    //if (cudaStatus != cudaSuccess) {
+    //    fprintf(stderr, "cudaFree failed: %s\n", cudaGetErrorString(cudaStatus));
+    //    goto Error;
+    //}
 
     // cudaDeviceSynchronize waits for the kernel to finish, and returns
     // any errors encountered during the launch.
