@@ -40,3 +40,10 @@ Demos/RayTracing/x64
 *.exe
 *.out
 *.app
+Cuda122Demos/.vs
+Cuda122Demos/ConsoleApplication1/x64
+Cuda122Demos/GlutCuda/x64
+.vs
+Cuda122Demos/mutil-thread-opengl/mutil-thread-opengl/x64
+Cuda122Demos/x64
+Cuda122Demos/mutil-thread-opengl/x64
