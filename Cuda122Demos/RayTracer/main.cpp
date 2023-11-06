@@ -1,5 +1,5 @@
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
-
+// https://www.3dgep.com/opengl-interoperability-with-cuda/#The_CUDA_Kernel
 #include "GL/glew.h"
 #include <GL/glut.h>
 #include <iostream>
@@ -8,13 +8,17 @@
 #include "cuda_gl_interop.h"
 static int window_width = 512;
 static int window_height = 512;
-static GLuint  vbo = 0;
-cudaGraphicsResource* cudavbo = nullptr;
+//static GLuint  vbo = 0;
+
 GLuint shaderProgram = 0;
 GLuint texture = 0;
 GLuint VAO, VBO[2];
+cudaGraphicsResource* cudavbo0 = nullptr;
+cudaGraphicsResource* cuda_texture = nullptr;
 bool moveleft(float* vert);
 void moveleft();
+bool render(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels);
+void render();
 
 
 const char* vertexShaderSource = "#version 330\n"
@@ -83,7 +87,12 @@ void keyboard(unsigned char key, int x, int y) {
         moveleft();
         printf("a\n");
         break;
+    case 'r':
+        render();
+        printf("r\n");
+        break;
 	}
+
 }
 bool initGL(int* argc, char** argv) {
     std::cout << "initGL" << std::endl;
@@ -162,8 +171,8 @@ bool initGL(int* argc, char** argv) {
     glBindTexture(GL_TEXTURE_2D, texture);
 
     // set texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     // set texture filtering parameters
@@ -172,15 +181,15 @@ bool initGL(int* argc, char** argv) {
 
     // load image, create texture and generate mipmaps
     GLenum err = glGetError();
-    int width = 640, height = 480, channels = 3;
-    unsigned char* data = new unsigned char[width * height * channels];
-    for (int i = 0; i < width * height * channels; i++) {
+    int channels = 3;
+    unsigned char* data = new unsigned char[window_width * window_height * channels];
+    for (int i = 0; i < window_width * window_height * channels; i++) {
         //    memset(data, 255, width * height * channels);
         data[i] = i % 256;
     }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     //render(data, width, height, channels);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // note how we specify the texture's data value to be float
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // note how we specify the texture's data value to be float
     err = glGetError();
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -242,21 +251,58 @@ bool initGL(int* argc, char** argv) {
 }
 void moveleft() {
     cudaError_t cudaStatus;
-    cudaStatus = cudaGraphicsMapResources(1, &cudavbo, 0);
+    cudaStatus = cudaGraphicsMapResources(1, &cudavbo0, 0);
     size_t num_bytes;
     float* devvert = 0;
-    cudaStatus = cudaGraphicsResourceGetMappedPointer((void**)&devvert, &num_bytes, cudavbo);
+    cudaStatus = cudaGraphicsResourceGetMappedPointer((void**)&devvert, &num_bytes, cudavbo0);
     moveleft(devvert);
-    cudaStatus = cudaGraphicsUnmapResources(1, &cudavbo, 0);
+    cudaStatus = cudaGraphicsUnmapResources(1, &cudavbo0, 0);
+}
+
+void render() {
+    cudaError_t cudaStatus = cudaSuccess;
+    
+    size_t num_bytes = window_width * window_height* 4;
+    unsigned char* dev_texture = 0;
+    cudaStatus = cudaMalloc((void**)&dev_texture, num_bytes * sizeof(unsigned char));
+    render(dev_texture, window_width, window_height, 4);
+
+
+
+    cudaStatus = cudaGraphicsMapResources(1, &cuda_texture, 0);
+
+    cudaArray* devArray;
+    cudaStatus = cudaGraphicsSubResourceGetMappedArray(&devArray, cuda_texture, 0, 0);
+
+    
+    //cudaStatus = cudaMemcpyToArray(devArray, 0, 0, (void*)dev_texture, num_bytes, cudaMemcpyDeviceToDevice);
+    cudaStatus = cudaMemcpy2DToArray(devArray, 0, 0, (void*)dev_texture, window_width * 4, window_width * 4, window_height, cudaMemcpyDeviceToDevice);
+
+
+    //cudaStatus = cudaGraphicsResourceGetMappedPointer((void**)&dev_texture, &num_bytes, cuda_texture);
+    
+
+    
+
+
+    cudaStatus = cudaGraphicsUnmapResources(1, &cuda_texture, 0);
+
+    cudaFree(dev_texture);
+    dev_texture = 0;
+
+
 }
 
 void initCuda() {
     std::cout << "initCuda" << std::endl;
     cudaError_t cudaStatus;
     cudaStatus = cudaSetDevice(0);
-    cudaStatus = cudaGraphicsGLRegisterBuffer(&cudavbo, vbo, cudaGraphicsMapFlagsWriteDiscard);
+    cudaStatus = cudaGraphicsGLRegisterBuffer(&cudavbo0, VBO[0], cudaGraphicsMapFlagsWriteDiscard);
+    //cudaStatus = cudaGraphicsGLRegisterBuffer(&cuda_texture, texture, cudaGraphicsMapFlagsWriteDiscard);
+    cudaStatus = cudaGraphicsGLRegisterImage(&cuda_texture, texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsNone);
 
-    moveleft();
+    //moveleft();
+    render();
     int a = 0;
     int b = 0;
 
