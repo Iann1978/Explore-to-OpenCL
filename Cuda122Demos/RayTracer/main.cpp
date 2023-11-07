@@ -6,6 +6,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "cuda_gl_interop.h"
+#include "vec3.h"
+#include "color.h"
+#include "ray.h"
+
 static int window_width = 512;
 static int window_height = 512;
 //static GLuint  vbo = 0;
@@ -240,7 +244,6 @@ bool initGL(int* argc, char** argv) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 
 
 

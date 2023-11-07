@@ -16,6 +16,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="color.h" />
+    <ClInclude Include="ray.h" />
+    <ClInclude Include="vec3.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{959F1C17-7376-4913-AE1D-4C78D9B99BCE}</ProjectGuid>
     <RootNamespace>RayTracer</RootNamespace>
