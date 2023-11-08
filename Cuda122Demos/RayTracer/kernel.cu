@@ -6,6 +6,7 @@
 #include "vec3.h"
 #include "ray.h"
 #include "color.h"
+#include "sphere.h"
 
 __global__ void moveleftKenel(float* vert)
 {
@@ -43,13 +44,22 @@ __device__ bool hit_sphere(const point3& center, double radius, const ray& r) {
     return (discriminant >= 0);
 }
 
-__device__ color ray_color(const ray& r) {
-    if (hit_sphere(point3(0, 0, -1), 0.5, r))
+__device__ color ray_color(const ray& r, const sphere& world) {
+    //if (hit_sphere(point3(0, 0, -1), 0.5, r))
+        //return color(1, 0, 0);
+    // 
+    if (hit_sphere(world.center, world.radius, r))
         return color(1, 0, 0);
+  //  hit_record rec;
+  //  if (world->hit(r, 0, 10000, rec))
+		//return color(1, 0, 0);
     vec3 unit_direction = unit_vector(r.direction());
     auto a = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
+
+
+__constant__ sphere dev_world;
 
 __global__ void renderKenel(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels)
 {
@@ -59,7 +69,9 @@ __global__ void renderKenel(unsigned char* dev_imgdata, int  img_width, int img_
 
     ray ry = getRay(row, col, img_width, img_height);
 
-    color c = ray_color(ry);
+    //sphere s(point3(0, 0, -1), 0.5);
+
+    color c = ray_color(ry, dev_world);
     
 
     //double r = double(row) / double(img_height);
@@ -111,9 +123,13 @@ Error:
     return false;
 }
 
-bool render(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels)
+bool render(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels, sphere* world)
 {
     cudaError_t cudaStatus = cudaSuccess;
+
+
+    cudaStatus = cudaMemcpyToSymbol( dev_world, world, sizeof(sphere));
+
     // execute the kernel
     dim3 block(16, 16, 1);
     dim3 grid(32, 32, 1);

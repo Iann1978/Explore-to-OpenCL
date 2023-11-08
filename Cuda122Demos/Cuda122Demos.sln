@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication1", "Cons
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "RayTracer\RayTracer.vcxproj", "{959F1C17-7376-4913-AE1D-4C78D9B99BCE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "constant_class", "constant_class\constant_class.vcxproj", "{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +83,14 @@ Global
 		{959F1C17-7376-4913-AE1D-4C78D9B99BCE}.Release|x64.Build.0 = Release|x64
 		{959F1C17-7376-4913-AE1D-4C78D9B99BCE}.Release|x86.ActiveCfg = Release|x64
 		{959F1C17-7376-4913-AE1D-4C78D9B99BCE}.Release|x86.Build.0 = Release|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Debug|x64.ActiveCfg = Debug|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Debug|x64.Build.0 = Debug|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Debug|x86.ActiveCfg = Debug|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Debug|x86.Build.0 = Debug|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Release|x64.ActiveCfg = Release|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Release|x64.Build.0 = Release|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Release|x86.ActiveCfg = Release|x64
+		{F4789F8C-62E4-4F1C-BB86-07DAB716BD05}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

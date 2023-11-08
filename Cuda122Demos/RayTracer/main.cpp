@@ -9,6 +9,7 @@
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
+#include "sphere.h"
 
 static int window_width = 512;
 static int window_height = 512;
@@ -19,9 +20,11 @@ GLuint texture = 0;
 GLuint VAO, VBO[2];
 cudaGraphicsResource* cudavbo0 = nullptr;
 cudaGraphicsResource* cuda_texture = nullptr;
+
+sphere* world = nullptr;
 bool moveleft(float* vert);
 void moveleft();
-bool render(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels);
+bool render(unsigned char* dev_imgdata, int  img_width, int img_height, int img_channels, sphere* world);
 void render();
 
 
@@ -268,7 +271,9 @@ void render() {
     size_t num_bytes = window_width * window_height* 4;
     unsigned char* dev_texture = 0;
     cudaStatus = cudaMalloc((void**)&dev_texture, num_bytes * sizeof(unsigned char));
-    render(dev_texture, window_width, window_height, 4);
+
+
+    render(dev_texture, window_width, window_height, 4, world);
 
 
 
@@ -305,7 +310,7 @@ void initCuda() {
     cudaStatus = cudaGraphicsGLRegisterImage(&cuda_texture, texture, GL_TEXTURE_2D, cudaGraphicsMapFlagsNone);
 
     //moveleft();
-    render();
+    
     int a = 0;
     int b = 0;
 
@@ -313,9 +318,18 @@ void initCuda() {
 
 }
 
+
+void initWorld() {
+    world = new sphere(vec3(0,0,-1), 0.5);
+    
+
+}
+
 int main(int argc, char** argv) {
     initGL(&argc, argv);
     initCuda();
+    initWorld();
+    render();
 	//glutInit(&argc, argv);
 	//glutCreateWindow("OpenGL Window");
 	//glutDisplayFunc(display);
