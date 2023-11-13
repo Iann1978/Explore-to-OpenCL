@@ -1,5 +1,6 @@
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
 // https://www.3dgep.com/opengl-interoperability-with-cuda/#The_CUDA_Kernel
+// CUDA C Programming Guide, John Cheng, Max Grossman, Ty McKercher
 #include "GL/glew.h"
 #include <GL/glut.h>
 #include <iostream>
